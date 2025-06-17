@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rehn - Matchmaking, Not Dating</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #7A1B3A;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Header */
+        .header {
+            background: #7A1B3A;
+            color: white;
+            padding: 50px 20px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .logo-heart {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 10px;
+            background: #E79AA6;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            position: relative;
+            transform: rotate(-45deg);
+        }
+
+        .logo-heart::after {
+            content: '';
+            width: 26px;
+            height: 40px;
+            background: #E79AA6;
+            border-radius: 50px 50px 0 0;
+            position: absolute;
+            left: 17px;
+            top: -20px;
+            transform: rotate(-45deg);
+            transform-origin: 0 100%;
+        }
+
+        .logo-heart::before {
+            content: '';
+            width: 26px;
+            height: 40px;
+            background: #E79AA6;
+            border-radius: 50px 50px 0 0;
+            position: absolute;
+            left: 17px;
+            top: -20px;
+            transform: rotate(45deg);
+            transform-origin: 100% 100%;
+        }
+
+        .app-title {
+            font-size: 32px;
+            font-weight: 300;
+            margin-bottom: 5px;
+            color: #E79AA6;
+        }
+
+        .tagline {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Navigation */
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 12px 8px;
+            text-align: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 12px;
+            transition: all 0.3s;
+            color: #666;
+        }
+
+        .nav-tab.active {
+            background: white;
+            color: #7A1B3A;
+            border-bottom: 2px solid #E79AA6;
+        }
+
+        /* Content Areas */
+        .tab-content {
+            display: none;
+            padding: 20px;
+            min-height: calc(100vh - 200px);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #f0f0f0;
+        }
+
+        .profile-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #E79AA6, #7A1B3A);
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            border: 3px solid #E79AA6;
+        }
+
+        .profile-name {
+            font-size: 22px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 8px;
+            color: #2c2c2c;
+        }
+
+        .profile-details {
+            text-align: center;
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .verification-badge {
+            display: inline-block;
+            background: #34C759;
+            color: white;
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-left: 8px;
+            font-weight: 600;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: #E79AA6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #d88394;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #666;
+            border: 1px solid #dee2e6;
+        }
+
+        .btn-danger {
+            background: #FF3B30;
+            color: white;
+        }
+
+        .btn-success {
+            background: #34C759;
+            color: white;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-buttons .btn {
+            margin-bottom: 0;
+        }
+
+        /* Stats Card */
+        .stats-card {
+            background: linear-gradient(135deg, #7A1B3A, #E79AA6);
+            color: white;
+            padding: 25px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Timer */
+        .deadline-timer {
+            background: #FFF3CD;
+            border: 1px solid #FFE69C;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: #856404;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c2c2c;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #f0f0f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: #E79AA6;
+        }
+
+        .form-textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        /* Safety Features */
+        .safety-card {
+            background: #FFF3E0;
+            border: 1px solid #FFE0B2;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .safety-card h4 {
+            color: #F57C00;
+            margin-bottom: 15px;
+        }
+
+        /* Match notification */
+        .match-notification {
+            background: #E8F5E8;
+            border: 1px solid #C8E6C9;
+            color: #2E7D32;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* Weekly limit indicator */
+        .swipe-limit {
+            background: #7A1B3A;
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .swipe-counter {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        /* Network connection styles */
+        .network-connection {
+            background: #F3E5F5;
+            border: 1px solid #E1BEE7;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .mutual-friend {
+            color: #7B1FA2;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .connection-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .connection-info {
+            flex: 1;
+        }
+
+        .connection-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .connection-message {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .connection-advantage {
+            background: #E8F5E8;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: #2E7D32;
+        }
+
+        .connection-alert {
+            background: #FFF3E0;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: #F57C00;
+        }
+
+        /* Contact Sync Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 350px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .contact-checkbox {
+            margin-right: 15px;
+            width: 20px;
+            height: 20px;
+        }
+
+        .contact-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #E79AA6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 14px;
+        }
+
+        .contact-info {
+            flex: 1;
+        }
+
+        .contact-name {
+            font-weight: 600;
+            color: #2c2c2c;
+            font-size: 14px;
+        }
+
+        .contact-relation {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* Hide all screens initially except gender selector */
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        #gender-selector {
+            display: block;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 60px;
+            left: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .gender-option {
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .gender-option:hover {
+            border-color: #E79AA6;
+            transform: translateY(-2px);
+        }
+
+        .switch-experience {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            cursor: pointer;
+            border: none;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Gender Selector Screen -->
+        <div id="gender-selector" class="screen active">
+            <div class="header">
+                <div class="logo-heart"></div>
+                <div class="app-title">Rehn</div>
+                <div class="tagline">Experience matchmaking from different perspectives</div>
+            </div>
+            
+            <div style="padding: 40px 20px;">
+                <div style="text-align: center; margin-bottom: 40px;">
+                    <h2 style="color: #2c2c2c; margin-bottom: 10px;">Choose Your Experience</h2>
+                    <p style="color: #666;">See how Rehn works differently for men and women</p>
+                </div>
+
+                <div class="card gender-option" style="margin-bottom: 20px;" onclick="showWomenExperience()">
+                    <div style="text-align: center;">
+                        <div style="font-size: 40px; margin-bottom: 15px;">👩</div>
+                        <h3 style="color: #7A1B3A; margin-bottom: 10px;">Experience as a Woman</h3>
+                        <p style="color: #666; font-size: 14px; line-height: 1.4;">
+                            • Choose from men who compete for your attention<br>
+                            • Review thoughtful messages and date proposals<br>
+                            • Set decision deadlines<br>
+                            • Control the pace of connections
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card gender-option" onclick="showMenExperience()">
+                    <div style="text-align: center;">
+                        <div style="font-size: 40px; margin-bottom: 15px;">👨</div>
+                        <h3 style="color: #7A1B3A; margin-bottom: 10px;">Experience as a Man</h3>
+                        <p style="color: #666; font-size: 14px; line-height: 1.4;">
+                            • Limited to 5 quality connections per week<br>
+                            • Write thoughtful interest messages<br>
+                            • Suggest specific first date ideas<br>
+                            • Must engage within 3 days or match expires
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Women's Experience -->
+        <div id="women-app" class="screen">
+            <div class="header">
+                <div class="logo-heart"></div>
+                <div class="app-title">Rehn</div>
+                <div class="tagline">Women's Experience - You Choose</div>
+                <button class="switch-experience" onclick="showGenderSelector()">Switch to Men's Experience</button>
+            </div>
+
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="switchWomenTab('women-dashboard')">Dashboard</button>
+                <button class="nav-tab" onclick="switchWomenTab('women-suitors')">Suitors</button>
+                <button class="nav-tab" onclick="switchWomenTab('women-network')">Network</button>
+                <button class="nav-tab" onclick="switchWomenTab('women-matches')">Matches</button>
+                <button class="nav-tab" onclick="switchWomenTab('women-dates')">Dates</button>
+                <button class="nav-tab" onclick="switchWomenTab('women-profile')">Profile</button>
+            </div>
+
+            <!-- Women's Dashboard -->
+            <div id="women-dashboard" class="tab-content active">
+                <div class="stats-card">
+                    <div class="stat-number">12</div>
+                    <div class="stat-label">Men competing for your attention this week</div>
+                </div>
+
+                <div class="match-notification">
+                    🎉 New match with Michael! He has 3 days to ask you on a date.
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 15px; color: #7A1B3A;">⏰ Urgent Decisions Needed</h3>
+                    <div style="padding: 10px 0; border-bottom: 1px solid #f0f0f0;">
+                        <strong>David, 30 (Doctor)</strong> - Decision expires in 8 hours
+                        <div style="font-size: 12px; color: #666;">Wants to take you to Denver Art Museum + dinner</div>
+                    </div>
+                    <div style="padding: 10px 0; border-bottom: 1px solid #f0f0f0;">
+                        <strong>James, 28 (Engineer)</strong> - Decision expires in 1 day
+                        <div style="font-size: 12px; color: #666;">Proposed hiking at Rocky Mountain National Park</div>
+                    </div>
+                    <div style="padding: 10px 0;">
+                        <strong>Alex, 32 (Teacher)</strong> - Decision expires in 2 days
+                        <div style="font-size: 12px; color: #666;">Wants to cook Italian dinner together</div>
+                    </div>
+                </div>
+
+                <div class="safety-card">
+                    <h4>🛡️ Date Safety Active</h4>
+                    <p style="font-size: 14px;">Your date with Michael tonight at 7 PM is being tracked. Emergency contacts notified.</p>
+                    <button class="btn btn-secondary" style="margin-top: 10px;">Update Safety Plan</button>
+                </div>
+            </div>
+
+            <!-- Women's Suitors -->
+            <div id="women-suitors" class="tab-content">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h3 style="color: #7A1B3A;">Your Suitors</h3>
+                    <p style="color: #666; font-size: 14px;">Men who have expressed interest in you</p>
+                </div>
+
+                <div class="deadline-timer">
+                    ⏰ 8 men need decisions within 3 days
+                </div>
+
+                <div class="card">
+                    <div class="profile-photo">MJ</div>
+                    <div class="profile-name">Michael, 32 <span class="verification-badge">✓ Verified</span></div>
+                    <div class="profile-details">Software Engineer • $120k+ • Owns home • Denver<br>Christian • Wants children • 6'1"</div>
+                    
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+                        <div style="font-weight: 600; color: #7A1B3A; margin-bottom: 10px;">His interest message:</div>
+                        <div style="font-size: 14px; line-height: 1.4;">
+                            "I was drawn to your profile because we both share a passion for hiking and strong family values. I noticed you volunteer at the animal shelter - I volunteer at the local food bank every weekend. I'd love to take you on a sunrise hike at Rocky Mountain National Park followed by breakfast at this amazing little café I know. What aspects of volunteer work do you find most rewarding?"
+                        </div>
+                    </div>
+
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+                        <div style="font-weight: 600; color: #7A1B3A; margin-bottom: 10px;">Date proposal:</div>
+                        <div style="font-size: 14px; line-height: 1.4;">
+                            "Rocky Mountain National Park sunrise hike + breakfast at Mountain View Café this Saturday 7 AM"
+                        </div>
+                    </div>
+
+                    <div style="background: #FFF3E0; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
+                        <strong style="color: #F57C00;">Decision deadline: 2 days, 8 hours</strong>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-success" onclick="acceptSuitor('Michael')">Accept</button>
+                        <button class="btn btn-secondary" onclick="declineSuitor('Michael')">Pass</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="profile-photo">DJ</div>
+                    <div class="profile-name">David, 29 <span class="verification-badge">✓ Verified</span></div>
+                    <div class="profile-details">Doctor • $150k+ • Owns home • Boulder<br>Catholic • Wants children • 5'11"</div>
+                    
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+                        <div style="font-weight: 600; color: #7A1B3A; margin-bottom: 10px;">His interest message:</div>
+                        <div style="font-size: 14px; line-height: 1.4;">
+                            "Your faith and dedication to teaching really resonates with me. As someone in medicine, I deeply value service to others. I saw you love cooking - I've been taking Italian cooking classes and would love to cook dinner together. Would you like to visit the Denver Art Museum followed by dinner at my place where I can show off my newfangled pasta-making skills?"
+                        </div>
+                    </div>
+
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+                        <div style="font-weight: 600; color: #7A1B3A; margin-bottom: 10px;">Date proposal:</div>
+                        <div style="font-size: 14px; line-height: 1.4;">
+                            "Denver Art Museum + homemade Italian dinner at his place this Friday 6 PM"
+                        </div>
+                    </div>
+
+                    <div style="background: #FFF3E0; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
+                        <strong style="color: #F57C00;">Decision deadline: 1 day, 14 hours</strong>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-success" onclick="acceptSuitor('David')">Accept</button>
+                        <button class="btn btn-secondary" onclick="declineSuitor('David')">Pass</button>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px; color: #666;">
+                    <p>6 more suitors pending...</p>
+                    <button class="btn btn-secondary">View All Suitors</button>
+                </div>
+            </div>
+
+            <!-- Women's Network -->
+            <div id="women-network" class="tab-content">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h3 style="color: #7A1B3A;">Matchmaking Network</h3>
+                    <p style="color: #666; font-size: 14px;">Friends and family helping you find love</p>
+                </div>
+
+                <div id="contacts-sync-section" style="display: none;">
+                    <div class="card">
+                        <h4 style="margin-bottom: 15px; color: #7A1B3A;">📱 Sync Your Contacts</h4>
+                        <p style="font-size: 14px; margin-bottom: 15px; color: #666;">
+                            Connect with friends and family who can introduce you to quality matches. Choose which contacts to sync.
+                        </p>
+                        <button class="btn btn-primary" onclick="showContactSelector()">Choose Contacts to Sync</button>
+                    </div>
+                </div>
+
+                <div class="card" style="background: linear-gradient(135deg, #E79AA6, #7A1B3A); color: white;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 32px; margin-bottom: 10px;">👥</div>
+                        <div style="font-size: 24px; font-weight: bold; margin-bottom: 5px;">47</div>
+                        <div style="font-size: 14px; opacity: 0.9;">Contacts synced as matchmakers</div>
+                    </div>
+                </div>
+
+                <div class="match-notification">
+                    🎉 New mutual connection found! Your friend Emma knows someone perfect for you.
+                </div>
+
+                <div class="card" style="border-left: 4px solid #E79AA6;">
+                    <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background: #E79AA6; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 15px;">EJ</div>
+                        <div>
+                            <div style="font-weight: 600; color: #7A1B3A;">👥 Mutual friend: Emma Johnson</div>
+                            <div style="font-size: 12px; color: #666;">College friend • Synced 2 weeks ago</div>
+                        </div>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <strong style="color: #7A1B3A;">Introduction Available:</strong><br>
+                        <span style="font-size: 14px;">"I have the perfect guy for you! David from my work - he's a doctor, super sweet, and looking for something serious. You both love hiking and have the same values. Want me to introduce you?"</span>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <strong style="color: #7A1B3A;">About David (30):</strong><br>
+                        <span style="font-size: 14px;">Emergency Medicine Doctor • Catholic • Wants children • Loves hiking, cooking • Never married</span>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="acceptIntroduction('David', 'Emma')">Accept Introduction</button>
+                        <button class="btn btn-secondary" onclick="declineIntroduction('David', 'Emma')">Not Interested</button>
+                    </div>
+                </div>
+
+                <div class="card" style="border-left: 4px solid #7A1B3A;">
+                    <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background: #7A1B3A; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 15px;">LM</div>
+                        <div>
+                            <div style="font-weight: 600; color: #7A1B3A;">👨‍👩‍👧‍👦 Family connection: Your cousin Lisa</div>
+                            <div style="font-size: 12px; color: #666;">Family • Synced 1 month ago</div>
+                        </div>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <strong style="color: #7A1B3A;">Mutual Discovery:</strong><br>
+                        <span style="font-size: 14px;">You both swiped right on Michael! Lisa knows him from her gym and says "He's one of the good ones - genuine, hardworking, and treats everyone with respect."</span>
+                    </div>
+                    <div style="background: #E8F5E8; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 15px;">
+                        <strong style="color: #2E7D32;">✓ Mutual interest confirmed by trusted connection</strong>
+                    </div>
+                    <button class="btn btn-success" onclick="prioritizeMatch('Michael')">Prioritize This Match</button>
+                </div>
+
+                <div class="card">
+                    <h4 style="margin-bottom: 15px;">📬 Invite More Matchmakers</h4>
+                    <p style="font-size: 14px; margin-bottom: 15px; color: #666;">
+                        Expand your network by inviting trusted friends and family to help with introductions.
+                    </p>
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary" onclick="inviteMoreContacts()">Invite More Friends</button>
+                        <button class="btn btn-secondary" onclick="manageContactSync()">Manage Synced Contacts</button>
+                    </div>
+                </div>
+            </div>
+            <div id="women-matches" class="tab-content">
+                <div class="match-notification">
+                    🎉 Michael matched with you! He has 2 days left to ask you on a date.
+                </div>
+
+                <div class="card">
+                    <div class="profile-photo">MJ</div>
+                    <div class="profile-name">Michael, 32 <span class="verification-badge">✓ Verified</span></div>
+                    <div class="profile-details">Software Engineer • Matched 1 hour ago</div>
+                    
+                    <div style="background: #d4edda; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <strong>Waiting for him to ask you on a date...</strong><br>
+                        <small>He has 2 days, 23 hours remaining or the match expires</small>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary">View His Profile</button>
+                        <button class="btn btn-secondary">Send Encouragement</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Women's Dates -->
+            <div id="women-dates" class="tab-content">
+                <div class="safety-card">
+                    <h4>📍 Date Safety Features</h4>
+                    <p style="font-size: 14px; margin-bottom: 15px;">
+                        Share your date location and time with trusted friends automatically.
+                    </p>
+                    <button class="btn btn-primary">Set Up Safety Alert</button>
+                </div>
+
+                <div class="card">
+                    <h4 style="color: #7A1B3A;">🍽️ Restaurants Near You</h4>
+                    <p style="color: #666; font-size: 14px; margin-bottom: 15px;">Rochester, NY</p>
+                    <div style="margin: 10px 0;">
+                        <strong>The Revelry</strong> - Upscale American cuisine<br>
+                        <small style="color: #666;">Perfect for first dates • $$$ • 0.8 miles</small>
+                    </div>
+                    <div style="margin: 10px 0;">
+                        <strong>Good Luck Restaurant</strong> - Historic charm<br>
+                        <small style="color: #666;">Romantic atmosphere • $$ • 1.2 miles</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Women's Dates -->
+            <div id="women-dates" class="tab-content">
+                <div class="safety-card">
+                    <h4>📍 Date Safety Features</h4>
+                    <p style="font-size: 14px; margin-bottom: 15px;">
+                        Share your date location and time with trusted friends automatically.
+                    </p>
+                    <button class="btn btn-primary">Set Up Safety Alert</button>
+                </div>
+
+                <div class="card">
+                    <h4 style="color: #7A1B3A;">🍽️ Restaurants Near You</h4>
+                    <p style="color: #666; font-size: 14px; margin-bottom: 15px;">Rochester, NY</p>
+                    <div style="margin: 10px 0;">
+                        <strong>The Revelry</strong> - Upscale American cuisine<br>
+                        <small style="color: #666;">Perfect for first dates • $$ • 0.8 miles</small>
+                    </div>
+                    <div style="margin: 10px 0;">
+                        <strong>Good Luck Restaurant</strong> - Historic charm<br>
+                        <small style="color: #666;">Romantic atmosphere • $ • 1.2 miles</small>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h4 style="color: #7A1B3A;">🎨 Art & Culture</h4>
+                    <div style="margin: 10px 0;">
+                        <strong>Memorial Art Gallery</strong> - World-class collection<br>
+                        <small style="color: #666;">Great conversation starter • $ • 2.1 miles</small>
+                    </div>
+                    <div style="margin: 10px 0;">
+                        <strong>Eastman Theater</strong> - Live performances<br>
+                        <small style="color: #666;">Dress up night • $$ • 1.5 miles</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Women's Profile -->
+            <div id="women-profile" class="tab-content">
+                <div class="card">
+                    <div class="profile-photo">JS</div>
+                    <div class="profile-name">Jennifer, 29 <span class="verification-badge">✓ Verified</span></div>
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary">Edit Profile</button>
+                        <button class="btn btn-secondary">Safety & Privacy</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h4 style="margin-bottom: 15px; color: #7A1B3A;">Matchmaking Network Settings</h4>
+                    <div style="font-size: 14px; color: #666; margin-bottom: 15px;">
+                        <strong>47 contacts synced</strong><br>
+                        Control who can make introductions and view your dating activity.
+                    </div>
+                    <button class="btn btn-secondary">Manage Network Privacy</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Men's Experience -->
+        <div id="men-app" class="screen">
+            <div class="header">
+                <div class="logo-heart"></div>
+                <div class="app-title">Rehn</div>
+                <div class="tagline">Men's Experience - Compete to Win</div>
+                <button class="switch-experience" onclick="showGenderSelector()">Switch to Women's Experience</button>
+            </div>
+
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="switchMenTab('men-dashboard')">Dashboard</button>
+                <button class="nav-tab" onclick="switchMenTab('men-discover')">Discover</button>
+                <button class="nav-tab" onclick="switchMenTab('men-network')">Network</button>
+                <button class="nav-tab" onclick="switchMenTab('men-pending')">Pending</button>
+                <button class="nav-tab" onclick="switchMenTab('men-dates')">Dates</button>
+                <button class="nav-tab" onclick="switchMenTab('men-profile')">Profile</button>
+            </div>
+
+            <!-- Men's Dashboard -->
+            <div id="men-dashboard" class="tab-content active">
+                <div class="swipe-limit">
+                    <div class="swipe-counter">2/5</div>
+                    <div>Interest requests remaining this week</div>
+                    <div style="font-size: 12px; margin-top: 5px;">Resets Monday • Use them wisely</div>
+                </div>
+
+                <div class="deadline-timer">
+                    ⚠️ Urgent: You have 2 days to ask Sarah on a date or the match expires
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 15px; color: #7A1B3A;">🎯 Active Interests</h3>
+                    <div style="padding: 10px 0; border-bottom: 1px solid #f0f0f0;">
+                        <strong>Jennifer, 27 (Teacher)</strong> - Considering your request
+                        <div style="font-size: 12px; color: #666;">She has 2 days to decide • 3 other men competing</div>
+                    </div>
+                    <div style="padding: 10px 0; border-bottom: 1px solid #f0f0f0;">
+                        <strong>Amy, 29 (Nurse)</strong> - Decision pending
+                        <div style="font-size: 12px; color: #666;">She has 1 day to decide • 5 other men competing</div>
+                    </div>
+                    <div style="padding: 10px 0;">
+                        <strong>Lisa, 26 (Designer)</strong> - Decision pending
+                        <div style="font-size: 12px; color: #666;">She has 3 days to decide • 2 other men competing</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 15px; color: #7A1B3A;">💡 Success Tips</h3>
+                    <ul style="list-style: none; padding: 0; font-size: 14px;">
+                        <li style="margin-bottom: 8px;">✓ Reference something specific from her profile</li>
+                        <li style="margin-bottom: 8px;">✓ Suggest a concrete first date idea with time/place</li>
+                        <li style="margin-bottom: 8px;">✓ Be clear about your relationship intentions</li>
+                        <li style="margin-bottom: 8px;">✓ Write at least 50 words to show genuine effort</li>
+                        <li style="margin-bottom: 8px;">✓ Ask thoughtful questions about her interests</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Men's Discover -->
+            <div id="men-discover" class="tab-content">
+                <div class="swipe-limit">
+                    <div class="swipe-counter">3/5</div>
+                    <div>Interest requests remaining this week</div>
+                    <div style="font-size: 12px; margin-top: 5px;">Choose carefully - quality over quantity</div>
+                </div>
+
+                <div class="card">
+                    <div class="profile-photo">SL</div>
+                    <div class="profile-name">Sarah, 28 <span class="verification-badge">✓ Verified</span></div>
+                    <div class="profile-details">Marketing Manager • Catholic • Wants children<br>Denver • Loves hiking, cooking, travel</div>
+                    
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+                        <div style="font-weight: 600; color: #7A1B3A; margin-bottom: 10px;">About Sarah:</div>
+                        <div style="font-size: 14px; line-height: 1.4;">
+                            "Looking for a genuine connection with someone who shares my faith and wants to build a family together. I love exploring new restaurants and planning weekend adventures. Family is everything to me."
+                        </div>
+                    </div>
+
+                    <div style="background: #FFF3E0; padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+                        <div style="font-weight: 600; color: #F57C00; margin-bottom: 10px;">⚠️ Competition Alert:</div>
+                        <div style="font-size: 14px; color: #E65100;">
+                            4 other men are also interested in Sarah. Make your message stand out!
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="showInterestForm()">Express Interest</button>
+                        <button class="btn btn-secondary" onclick="nextProfile()">Next Profile</button>
+                    </div>
+                </div>
+
+                <div class="deadline-timer">
+                    ⚠️ Remember: After matching, you have 3 days to ask her on a date or the match expires
+                </div>
+            </div>
+
+            <!-- Men's Network -->
+            <div id="men-network" class="tab-content">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h3 style="color: #7A1B3A;">Matchmaking Network</h3>
+                    <p style="color: #666; font-size: 14px;">Leverage your connections to find quality matches</p>
+                </div>
+
+                <div class="card" style="background: linear-gradient(135deg, #E79AA6, #7A1B3A); color: white;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 32px; margin-bottom: 10px;">🤝</div>
+                        <div style="font-size: 24px; font-weight: bold; margin-bottom: 5px;">52</div>
+                        <div style="font-size: 14px; opacity: 0.9;">Contacts synced as matchmakers</div>
+                    </div>
+                </div>
+
+                <div class="deadline-timer">
+                    💡 3 women you're interested in have mutual connections with your network
+                </div>
+
+                <div class="card" style="border-left: 4px solid #34C759;">
+                    <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background: #34C759; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 15px;">MR</div>
+                        <div>
+                            <div style="font-weight: 600; color: #7A1B3A;">🎯 Strong Connection Found</div>
+                            <div style="font-size: 12px; color: #666;">Your college buddy Mike Rodriguez</div>
+                        </div>
+                    </div>
+                    <div style="background: #E8F5E8; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <strong style="color: #2E7D32;">Jennifer (Teacher) - Mutual connection!</strong><br>
+                        <span style="font-size: 14px;">Mike says: "Dude, I know Jennifer from my girlfriend's book club. She's amazing - smart, funny, and looking for something real. You guys would be perfect together. Want me to put in a good word?"</span>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <strong style="color: #7A1B3A;">Advantage:</strong><br>
+                        <span style="font-size: 14px;">✓ Trusted mutual connection<br>✓ Personal recommendation<br>✓ Higher chance of acceptance</span>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="requestIntroduction('Jennifer', 'Mike')">Request Introduction</button>
+                        <button class="btn btn-secondary" onclick="expressInterestDirect('Jennifer')">Express Interest Directly</button>
+                    </div>
+                </div>
+
+                <div class="card" style="border-left: 4px solid #E79AA6;">
+                    <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background: #E79AA6; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 15px;">AS</div>
+                        <div>
+                            <div style="font-weight: 600; color: #7A1B3A;">👨‍👩‍👧‍👦 Family Connection</div>
+                            <div style="font-size: 12px; color: #666;">Your sister Amanda Smith</div>
+                        </div>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <strong style="color: #7A1B3A;">Potential Match: Sarah (Marketing Manager)</strong><br>
+                        <span style="font-size: 14px;">Amanda works with Sarah and says: "She's exactly your type - loves hiking, has strong family values, and is looking for something serious. I could arrange for you both to 'accidentally' bump into each other at our company picnic."</span>
+                    </div>
+                    <div style="background: #FFF3E0; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 15px;">
+                        <strong style="color: #F57C00;">🔥 Hot tip: Sarah mentioned she's tired of dating apps</strong>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="planMeeting('Sarah', 'Amanda')">Plan Casual Meeting</button>
+                        <button class="btn btn-secondary" onclick="getMoreInfo('Sarah')">Learn More About Sarah</button>
+                    </div>
+                </div>
+
+                <div class="card" style="border-left: 4px solid #FFB84D;">
+                    <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background: #FFB84D; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 15px;">JL</div>
+                        <div>
+                            <div style="font-weight: 600; color: #7A1B3A;">⚠️ Mutual Interest Alert</div>
+                            <div style="font-size: 12px; color: #666;">Your workout buddy Jake</div>
+                        </div>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <strong style="color: #7A1B3A;">Amy (Nurse) - She asked about you!</strong><br>
+                        <span style="font-size: 14px;">Jake says: "Bro, remember that nurse Amy I introduced you to at my party last month? She asked me about you yesterday - 'Is your friend John single?' I think she's interested!"</span>
+                    </div>
+                    <div style="background: #E8F5E8; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 15px;">
+                        <strong style="color: #2E7D32;">✓ She's already interested - high success probability</strong>
+                    </div>
+                    <button class="btn btn-success" onclick="followUpInterest('Amy', 'Jake')">Follow Up on Her Interest</button>
+                </div>
+
+                <div class="card">
+                    <h4 style="margin-bottom: 15px;">🔍 Expand Your Network</h4>
+                    <p style="font-size: 14px; margin-bottom: 15px; color: #666;">
+                        Add more trusted connections to discover quality matches through mutual friends and family.
+                    </p>
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary" onclick="syncMoreContacts()">Add More Contacts</button>
+                        <button class="btn btn-secondary" onclick="inviteNetworkMatchmakers()">Invite Family to Help</button>
+                    </div>
+                </div>
+            </div>
+            <div id="men-pending" class="tab-content">
+                <div class="card">
+                    <h3 style="margin-bottom: 15px; color: #7A1B3A;">📋 Waiting for Responses</h3>
+                    <div style="padding: 15px 0; border-bottom: 1px solid #f0f0f0;">
+                        <strong>Jennifer, 27 (Teacher)</strong>
+                        <div style="font-size: 12px; color: #666; margin: 5px 0;">
+                            Your message: "I love that you're passionate about education. As someone who volunteers with kids..."
+                        </div>
+                        <div style="background: #FFF3E0; padding: 8px; border-radius: 6px; font-size: 12px; color: #F57C00;">
+                            She has 2 days to decide • 3 other men competing
+                        </div>
+                    </div>
+                    <div style="padding: 15px 0; border-bottom: 1px solid #f0f0f0;">
+                        <strong>Amy, 29 (Nurse)</strong>
+                        <div style="font-size: 12px; color: #666; margin: 5px 0;">
+                            Your message: "Your dedication to helping others really inspires me..."
+                        </div>
+                        <div style="background: #FFF3E0; padding: 8px; border-radius: 6px; font-size: 12px; color: #F57C00;">
+                            She has 1 day to decide • 5 other men competing
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Men's Dates -->
+            <div id="men-dates" class="tab-content">
+                <div class="card">
+                    <h4 style="color: #7A1B3A;">💡 Date Planning Tips</h4>
+                    <ul style="list-style: none; padding: 0; font-size: 14px;">
+                        <li style="margin-bottom: 8px;">✓ Always suggest a specific place and time</li>
+                        <li style="margin-bottom: 8px;">✓ Choose public, comfortable locations</li>
+                        <li style="margin-bottom: 8px;">✓ Plan activities that allow conversation</li>
+                        <li style="margin-bottom: 8px;">✓ Have a backup plan for weather</li>
+                        <li style="margin-bottom: 8px;">✓ Respect her comfort level and preferences</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h4 style="color: #7A1B3A;">🍽️ Great First Date Spots</h4>
+                    <p style="color: #666; font-size: 14px; margin-bottom: 15px;">Rochester, NY</p>
+                    <div style="margin: 10px 0;">
+                        <strong>The Revelry</strong> - Upscale American cuisine<br>
+                        <small style="color: #666;">Perfect for first dates • $$$ • 0.8 miles</small>
+                    </div>
+                    <div style="margin: 10px 0;">
+                        <strong>Good Luck Restaurant</strong> - Historic charm<br>
+                        <small style="color: #666;">Romantic atmosphere • $$ • 1.2 miles</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Men's Dates -->
+            <div id="men-dates" class="tab-content">
+                <div class="card">
+                    <h4 style="color: #7A1B3A;">💡 Date Planning Tips</h4>
+                    <ul style="list-style: none; padding: 0; font-size: 14px;">
+                        <li style="margin-bottom: 8px;">✓ Always suggest a specific place and time</li>
+                        <li style="margin-bottom: 8px;">✓ Choose public, comfortable locations</li>
+                        <li style="margin-bottom: 8px;">✓ Plan activities that allow conversation</li>
+                        <li style="margin-bottom: 8px;">✓ Have a backup plan for weather</li>
+                        <li style="margin-bottom: 8px;">✓ Respect her comfort level and preferences</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h4 style="color: #7A1B3A;">🍽️ Great First Date Spots</h4>
+                    <p style="color: #666; font-size: 14px; margin-bottom: 15px;">Rochester, NY</p>
+                    <div style="margin: 10px 0;">
+                        <strong>The Revelry</strong> - Upscale American cuisine<br>
+                        <small style="color: #666;">Perfect for first dates • $$ • 0.8 miles</small>
+                    </div>
+                    <div style="margin: 10px 0;">
+                        <strong>Good Luck Restaurant</strong> - Historic charm<br>
+                        <small style="color: #666;">Romantic atmosphere • $ • 1.2 miles</small>
+                    </div>
+                    <div style="margin: 10px 0;">
+                        <strong>Memorial Art Gallery</strong> - World-class art<br>
+                        <small style="color: #666;">Great conversation starter • $ • 2.1 miles</small>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h4 style="color: #7A1B3A;">⚡ Success Strategy</h4>
+                    <p style="font-size: 14px; color: #666; margin-bottom: 15px;">
+                        When asking someone on a date, be specific about time, place, and activity. Vague suggestions like "want to hang out sometime?" have low success rates.
+                    </p>
+                    <div style="background: #E8F5E8; padding: 12px; border-radius: 8px; font-size: 14px;">
+                        <strong>Good example:</strong> "Would you like to have dinner at The Revelry this Saturday at 7 PM? They have great pasta and a cozy atmosphere perfect for getting to know each other."
+                    </div>
+                </div>
+            </div>
+
+            <!-- Men's Profile -->
+            <div id="men-profile" class="tab-content">
+                <div class="card">
+                    <div class="profile-photo">JS</div>
+                    <div class="profile-name">John, 31 <span class="verification-badge">✓ Verified</span></div>
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary">Edit Profile</button>
+                        <button class="btn btn-secondary">Privacy Settings</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h4 style="margin-bottom: 15px; color: #7A1B3A;">Network Statistics</h4>
+                    <div style="font-size: 14px; color: #666; margin-bottom: 15px;">
+                        <strong>52 contacts synced</strong><br>
+                        <strong>3 potential introductions available</strong><br>
+                        Network connections have 3x higher success rates than cold approaches.
+                    </div>
+                    <button class="btn btn-secondary">Expand Your Network</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Sync Modal -->
+        <div id="contact-sync-modal" class="modal-overlay">
+            <div class="modal-content">
+                <h3 style="color: #7A1B3A; margin-bottom: 20px; text-align: center;">Choose Contacts to Sync</h3>
+                <p style="color: #666; font-size: 14px; margin-bottom: 20px; text-align: center;">
+                    Select trusted friends and family who know you well and can make quality introductions.
+                </p>
+
+                <div class="contact-item">
+                    <input type="checkbox" class="contact-checkbox" checked>
+                    <div class="contact-avatar">EJ</div>
+                    <div class="contact-info">
+                        <div class="contact-name">Emma Johnson</div>
+                        <div class="contact-relation">College friend • Great matchmaker</div>
+                    </div>
+                </div>
+
+                <div class="contact-item">
+                    <input type="checkbox" class="contact-checkbox" checked>
+                    <div class="contact-avatar">LM</div>
+                    <div class="contact-info">
+                        <div class="contact-name">Lisa Martinez</div>
+                        <div class="contact-relation">Cousin • Family</div>
+                    </div>
+                </div>
+
+                <div class="contact-item">
+                    <input type="checkbox" class="contact-checkbox">
+                    <div class="contact-avatar">MR</div>
+                    <div class="contact-info">
+                        <div class="contact-name">Mike Rodriguez</div>
+                        <div class="contact-relation">College buddy • Knows lots of people</div>
+                    </div>
+                </div>
+
+                <div class="contact-item">
+                    <input type="checkbox" class="contact-checkbox">
+                    <div class="contact-avatar">AS</div>
+                    <div class="contact-info">
+                        <div class="contact-name">Amanda Smith</div>
+                        <div class="contact-relation">Sister • Family</div>
+                    </div>
+                </div>
+
+                <div class="contact-item">
+                    <input type="checkbox" class="contact-checkbox" checked>
+                    <div class="contact-avatar">MOM</div>
+                    <div class="contact-info">
+                        <div class="contact-name">Mom</div>
+                        <div class="contact-relation">Family • Wants grandkids 😊</div>
+                    </div>
+                </div>
+
+                <div class="contact-item">
+                    <input type="checkbox" class="contact-checkbox">
+                    <div class="contact-avatar">DAD</div>
+                    <div class="contact-info">
+                        <div class="contact-name">Dad</div>
+                        <div class="contact-relation">Family • Work connections</div>
+                    </div>
+                </div>
+
+                <div class="contact-item">
+                    <input type="checkbox" class="contact-checkbox">
+                    <div class="contact-avatar">JL</div>
+                    <div class="contact-info">
+                        <div class="contact-name">Jake Lewis</div>
+                        <div class="contact-relation">Workout buddy • Gym friends</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; text-align: center; color: #666; font-size: 12px;">
+                    ✓ Your privacy is protected - contacts only see introductions you approve
+                </div>
+
+                <div class="action-buttons" style="margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="syncSelectedContacts()">Sync Selected Contacts</button>
+                    <button class="btn btn-secondary" onclick="closeContactSync()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showGenderSelector() {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById('gender-selector').classList.add('active');
+        }
+
+        function showWomenExperience() {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById('women-app').classList.add('active');
+        }
+
+        function showMenExperience() {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById('men-app').classList.add('active');
+        }
+
+        function switchWomenTab(tabId) {
+            // Hide all women's tabs
+            document.querySelectorAll('#women-app .tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('#women-app .nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function switchMenTab(tabId) {
+            // Hide all men's tabs
+            document.querySelectorAll('#men-app .tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('#men-app .nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function acceptSuitor(name) {
+            alert(`🎉 You've accepted ${name}'s interest! You're now matched and he has 3 days to ask you on a specific date or the match expires.`);
+        }
+
+        function declineSuitor(name) {
+            alert(`Decision recorded. ${name} will be respectfully notified that you're not a match. This helps everyone find their right person faster.`);
+        }
+
+        function showInterestForm() {
+            alert('Opening detailed interest form where you must write at least 50 words about why you\'re specifically interested in Sarah, your relationship goals, and suggest a concrete first date idea...');
+        }
+
+        function nextProfile() {
+            alert('Loading next verified woman\'s profile...');
+        }
+
+        // Network functions for both men and women
+        function showContactSelector() {
+            document.getElementById('contact-sync-modal').style.display = 'flex';
+        }
+
+        function closeContactSync() {
+            document.getElementById('contact-sync-modal').style.display = 'none';
+        }
+
+        function syncSelectedContacts() {
+            const checkedContacts = document.querySelectorAll('.contact-checkbox:checked').length;
+            alert(`🎉 Successfully synced ${checkedContacts} contacts to your matchmaking network! These trusted connections can now help you find quality matches through mutual introductions.`);
+            closeContactSync();
+        }
+
+        function acceptIntroduction(person, connector) {
+            alert(`🎉 Great choice! ${connector} will introduce you to ${person}. They'll arrange a casual meeting where you can get to know each other naturally. This introduction comes with a personal recommendation - much better than cold approaches!`);
+        }
+
+        function declineIntroduction(person, connector) {
+            alert(`No problem! ${connector} will be notified politely that you're not interested in meeting ${person} right now. Your network will keep looking for other potential matches.`);
+        }
+
+        function prioritizeMatch(person) {
+            alert(`✨ ${person} has been moved to the top of your suitors list! Having a mutual connection vouch for someone significantly increases match quality and success rates.`);
+        }
+
+        function inviteMoreContacts() {
+            alert('Sending invitations to more friends and family to join your matchmaking network. The more trusted connections you have, the better quality matches you\'ll discover!');
+        }
+
+        function manageContactSync() {
+            alert('Opening contact management where you can:\n• Add new contacts to sync\n• Remove contacts from your network\n• Set preferences for who can make introductions\n• Control privacy settings for your network');
+        }
+
+        function requestIntroduction(person, connector) {
+            alert(`🤝 Introduction request sent to ${connector}! They'll reach out to ${person} and arrange a natural meeting. Having a mutual friend vouch for you gives you a huge advantage over random dating app matches.`);
+        }
+
+        function expressInterestDirect(person) {
+            alert(`📱 You can still express interest directly through the app, but you'll compete with other men who don't have mutual connections. The introduction route has much higher success rates!`);
+        }
+
+        function planMeeting(person, connector) {
+            alert(`📅 ${connector} will coordinate a casual group meeting where you and ${person} can meet naturally. This takes the pressure off and feels more organic than a formal setup.`);
+        }
+
+        function getMoreInfo(person) {
+            alert(`📋 Requesting more details about ${person} from your connection. They'll share insights about her personality, interests, and what she's looking for in a relationship.`);
+        }
+
+        function followUpInterest(person, connector) {
+            alert(`🎯 Perfect timing! ${connector} will let ${person} know you're interested too. When there's mutual interest and a trusted connection, success rates are 85% higher than cold approaches.`);
+        }
+
+        function syncMoreContacts() {
+            alert('Opening contact sync where you can add more trusted friends and family to expand your matchmaking network. More connections = more quality introductions!');
+        }
+
+        function inviteNetworkMatchmakers() {
+            alert('Inviting family members to help with matchmaking. Studies show that relationships started through mutual connections have 3x higher success rates and last longer.');
+        }
+    </script>
+</body>
+</html>
